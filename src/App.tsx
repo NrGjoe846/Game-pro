@@ -9,7 +9,9 @@ import CompilerPage from './components/compiler/CompilerPage';
 import PythonFundamentals from './components/courses/PythonFundamentals';
 import JavaProgramming from './components/courses/JavaProgramming';
 import CProgramming from './components/courses/CProgramming';
-import PythonChallenge from './components/challenges/PythonChallenge';
+import LanguageSelection from './components/challenges/LanguageSelection';
+import LevelSelection from './components/challenges/LevelSelection';
+import DailyChallenge from './components/challenges/DailyChallenge';
 
 function App() {
   return (
@@ -66,10 +68,26 @@ function App() {
             }
           />
           <Route
-            path="/challenges/python"
+            path="/challenges/language-select"
             element={
               <ProtectedRoute>
-                <PythonChallenge />
+                <LanguageSelection />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/challenges/level-select"
+            element={
+              <ProtectedRoute>
+                <LevelSelection />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/challenges/daily"
+            element={
+              <ProtectedRoute>
+                <DailyChallenge />
               </ProtectedRoute>
             }
           />

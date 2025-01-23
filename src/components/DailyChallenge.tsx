@@ -6,7 +6,7 @@ const DailyChallenge = () => {
   const navigate = useNavigate();
 
   const handleStartChallenge = () => {
-    navigate('/challenges/python');
+    navigate('/challenges/select');
   };
 
   return (
