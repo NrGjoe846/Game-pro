@@ -1,7 +1,14 @@
 import React from 'react';
 import { Star, Clock, Trophy } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const DailyChallenge = () => {
+  const navigate = useNavigate();
+
+  const handleStartChallenge = () => {
+    navigate('/challenges/python');
+  };
+
   return (
     <div className="backdrop-blur-xl bg-white/10 rounded-2xl p-8 border border-white/20">
       <div className="flex items-center justify-between mb-6">
@@ -16,10 +23,12 @@ const DailyChallenge = () => {
       </div>
 
       <div className="mb-6">
-        <h3 className="text-xl font-semibold mb-2">Fibonacci Sequence</h3>
+        <h3 className="text-xl font-semibold mb-2">
+          Python Programming Challenge
+        </h3>
         <p className="text-gray-300">
-          Write a function that returns the nth number in the Fibonacci sequence.
-          Complete this challenge to earn 100 XP and a special badge!
+          Test your Python skills with our daily coding challenges. Complete
+          these challenges to earn XP and special badges!
         </p>
       </div>
 
@@ -30,10 +39,13 @@ const DailyChallenge = () => {
             <span>100 XP</span>
           </div>
           <div className="px-3 py-1 bg-blue-500/20 rounded-full text-blue-400">
-            Algorithm
+            Python
           </div>
         </div>
-        <button className="px-6 py-2 bg-blue-500 hover:bg-blue-600 rounded-lg transition-all duration-300">
+        <button
+          onClick={handleStartChallenge}
+          className="px-6 py-2 bg-blue-500 hover:bg-blue-600 rounded-lg transition-all duration-300"
+        >
           Start Challenge
         </button>
       </div>
