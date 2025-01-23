@@ -7,6 +7,8 @@ import Dashboard from './components/Dashboard';
 import ProfileDashboard from './components/profile/ProfileDashboard';
 import CompilerPage from './components/compiler/CompilerPage';
 import PythonFundamentals from './components/courses/PythonFundamentals';
+import CProgramming from './components/courses/CProgramming';
+import JavaProgramming from './components/courses/JavaProgramming';
 
 function App() {
   return (
@@ -43,6 +45,22 @@ function App() {
             element={
               <ProtectedRoute>
                 <PythonFundamentals />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/courses/c-programming"
+            element={
+              <ProtectedRoute>
+                <CProgramming />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/courses/java-programming"
+            element={
+              <ProtectedRoute>
+                <JavaProgramming />
               </ProtectedRoute>
             }
           />

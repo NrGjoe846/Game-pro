@@ -12,7 +12,7 @@ interface Course {
   progress: number;
   language: string;
   chapters: Chapter[];
-  path?: string; // Add path for course routing
+  path?: string;
 }
 
 interface Chapter {
@@ -33,7 +33,7 @@ const courses: Course[] = [
     xp: 1200,
     progress: 45,
     language: 'Python',
-    path: '/courses/python-fundamentals', // Add path for Python course
+    path: '/courses/python-fundamentals',
     chapters: [
       {
         id: 'py-ch1',
@@ -67,6 +67,7 @@ const courses: Course[] = [
     xp: 1500,
     progress: 25,
     language: 'Java',
+    path: '/courses/java-programming',
     chapters: [
       {
         id: 'java-ch1',
@@ -93,6 +94,7 @@ const courses: Course[] = [
     xp: 2000,
     progress: 10,
     language: 'C',
+    path: '/courses/c-programming',
     chapters: [
       {
         id: 'c-ch1',
