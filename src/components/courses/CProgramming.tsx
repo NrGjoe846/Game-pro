@@ -32,14 +32,13 @@ const coursePhases: Phase[] = [
       {
         id: 'intro',
         title: '1. Introduction to C Programming',
-        description: 'Learn about C installation, compiler setup, and write your first program.',
+        description: 'Learn about C installation, IDE setup, and write your first program.',
         completed: false,
         locked: false,
         subtopics: [
-          { id: 'setup', title: 'Installing C compiler (GCC, Turbo C, Code::Blocks)', completed: false },
-          { id: 'env', title: 'Setting up the development environment', completed: false },
+          { id: 'setup', title: 'Installing GCC and setting up the environment (Code::Blocks, Visual Studio)', completed: false },
           { id: 'first-program', title: 'Writing your first C program', completed: false },
-          { id: 'compilation', title: 'Compilation and execution process', completed: false },
+          { id: 'compilation', title: 'Compilation and execution process in C', completed: false },
           { id: 'structure', title: 'Structure of a C program', completed: false }
         ]
       },
@@ -50,8 +49,8 @@ const coursePhases: Phase[] = [
         completed: false,
         locked: true,
         subtopics: [
-          { id: 'basic-types', title: 'Basic data types: int, float, char, double', completed: false },
-          { id: 'modifiers', title: 'Type modifiers: short, long, signed, unsigned', completed: false },
+          { id: 'primitive-types', title: 'Primitive data types: int, float, char, boolean', completed: false },
+          { id: 'modifiers', title: 'Type modifiers: short, long, unsigned', completed: false },
           { id: 'variables', title: 'Variable declaration and initialization', completed: false },
           { id: 'constants', title: 'Constants and literals', completed: false },
           { id: 'type-conversion', title: 'Type conversions and casting', completed: false }
@@ -59,16 +58,16 @@ const coursePhases: Phase[] = [
       },
       {
         id: 'operators',
-        title: '3. Operators and Expressions',
-        description: 'Learn about different types of operators in C.',
+        title: '3. Control Flow and Operators',
+        description: 'Learn about operators and control flow statements in C.',
         completed: false,
         locked: true,
         subtopics: [
           { id: 'arithmetic', title: 'Arithmetic operators: +, -, *, /, %', completed: false },
           { id: 'relational', title: 'Relational operators: ==, !=, >, <, >=, <=', completed: false },
           { id: 'logical', title: 'Logical operators: &&, ||, !', completed: false },
-          { id: 'bitwise', title: 'Bitwise operators: &, |, ^, ~, <<, >>', completed: false },
-          { id: 'assignment', title: 'Assignment and increment/decrement operators', completed: false }
+          { id: 'control-flow', title: 'Control flow statements: if, else, switch', completed: false },
+          { id: 'loops', title: 'Loops: for, while, do-while', completed: false }
         ]
       }
     ]
@@ -76,7 +75,7 @@ const coursePhases: Phase[] = [
   {
     id: 'phase-2',
     title: 'Phase 2: Working with Data Collections',
-    description: 'Learn to manipulate collections of data using arrays, strings, and pointers.',
+    description: 'Learn to store and manipulate collections of data in C.',
     topics: [
       {
         id: 'arrays',
@@ -86,44 +85,81 @@ const coursePhases: Phase[] = [
         locked: true,
         subtopics: [
           { id: 'array-basics', title: 'Declaring and initializing arrays', completed: false },
-          { id: 'multidim', title: 'Multi-dimensional arrays', completed: false },
-          { id: 'strings', title: 'String handling functions', completed: false },
-          { id: 'string-ops', title: 'String manipulation techniques', completed: false }
+          { id: 'array-ops', title: 'Array operations and manipulation', completed: false },
+          { id: 'strings', title: 'String handling methods (string.h)', completed: false },
+          { id: 'string-builder', title: 'Dynamic strings (using malloc)', completed: false }
         ]
       },
       {
         id: 'pointers',
-        title: '5. Pointers',
-        description: 'Understanding memory addresses and pointer operations.',
+        title: '5. Pointers and Memory Management',
+        description: 'Understanding pointers and dynamic memory management.',
         completed: false,
         locked: true,
         subtopics: [
-          { id: 'pointer-basics', title: 'Pointer declaration and initialization', completed: false },
-          { id: 'pointer-arithmetic', title: 'Pointer arithmetic', completed: false },
-          { id: 'pointer-arrays', title: 'Pointers and arrays', completed: false },
-          { id: 'dynamic-memory', title: 'Dynamic memory allocation', completed: false }
+          { id: 'pointer-basics', title: 'Pointer declaration and dereferencing', completed: false },
+          { id: 'pointer-ops', title: 'Pointer arithmetic', completed: false },
+          { id: 'dynamic-memory', title: 'Allocating memory dynamically (malloc, free)', completed: false }
         ]
       }
     ]
   },
   {
     id: 'phase-3',
-    title: 'Phase 3: Advanced Topics',
-    description: 'Explore advanced C programming concepts and real-world applications.',
+    title: 'Phase 3: Functions and Modular Programming',
+    description: 'Master functions, modular programming, and function pointers in C.',
     topics: [
       {
-        id: 'file-handling',
-        title: '6. File Handling',
-        description: 'Learn to work with files in C.',
+        id: 'functions',
+        title: '6. Functions in C',
+        description: 'Learn how to define and use functions in C.',
         completed: false,
         locked: true,
         subtopics: [
-          { id: 'file-ops', title: 'File operations: fopen(), fclose()', completed: false },
-          { id: 'file-io', title: 'Reading from and writing to files', completed: false },
-          { id: 'binary-files', title: 'Working with binary files', completed: false },
+          { id: 'defining-functions', title: 'Defining and calling functions', completed: false },
+          { id: 'parameters', title: 'Passing arguments to functions (pass by value, reference)', completed: false },
+          { id: 'recursion', title: 'Recursion in C', completed: false },
+          { id: 'function-pointers', title: 'Using function pointers', completed: false }
+        ]
+      },
+    ]
+  },
+  {
+    id: 'phase-4',
+    title: 'Phase 4: File I/O and Error Handling',
+    description: 'Learn to handle errors and perform input/output operations in C.',
+    topics: [
+      {
+        id: 'file-io',
+        title: '7. File Input/Output',
+        description: 'Working with files and performing file operations.',
+        completed: false,
+        locked: true,
+        subtopics: [
+          { id: 'file-open', title: 'Opening and closing files (fopen, fclose)', completed: false },
+          { id: 'file-read-write', title: 'Reading and writing files (fread, fwrite, fscanf)', completed: false },
           { id: 'error-handling', title: 'Error handling in file operations', completed: false }
         ]
-      }
+      },
+    ]
+  },
+  {
+    id: 'phase-5',
+    title: 'Phase 5: Advanced Topics in C',
+    description: 'Explore advanced topics and concepts in C programming.',
+    topics: [
+      {
+        id: 'advanced-topics',
+        title: '8. Advanced C Concepts',
+        description: 'Learn advanced C topics like multi-threading, libraries, and optimization.',
+        completed: false,
+        locked: true,
+        subtopics: [
+          { id: 'multithreading', title: 'Introduction to multithreading', completed: false },
+          { id: 'libraries', title: 'Creating and using libraries in C', completed: false },
+          { id: 'optimizations', title: 'Optimizing C code for performance', completed: false }
+        ]
+      },
     ]
   }
 ];
@@ -152,7 +188,7 @@ const CProgramming = () => {
             <ArrowLeft className="w-6 h-6" />
           </Link>
           <div>
-            <h1 className="text-3xl font-bold mb-2">C Programming Journey</h1>
+            <h1 className="text-3xl font-bold mb-2">C Programming Mastery</h1>
             <p className="text-gray-400">
               A comprehensive course covering C programming from basics to advanced concepts
             </p>
@@ -177,7 +213,7 @@ const CProgramming = () => {
             </div>
             <div className="flex items-center gap-2">
               <Lock className="w-4 h-4 text-gray-400" />
-              <span className="text-sm text-gray-400">12 Topics Remaining</span>
+              <span className="text-sm text-gray-400">15 Topics Remaining</span>
             </div>
           </div>
         </div>
@@ -260,15 +296,15 @@ const CProgramming = () => {
                                     ) : (
                                       <div className="w-4 h-4 rounded-full border border-gray-500" />
                                     )}
-                                    <span className="text-sm">{subtopic.title}</span>
+                                    <span className="text-sm text-gray-400">{subtopic.title}</span>
                                   </div>
-                                  {!topic.locked && !subtopic.completed && (
-                                    <Link
-                                      to="/compiler"
-                                      className="px-3 py-1 text-sm bg-blue-500/20 hover:bg-blue-500/30 rounded-lg transition-all duration-300"
+                                  {!subtopic.completed && !topic.locked && (
+                                    <button
+                                      onClick={() => alert(`Starting ${subtopic.title}`)}
+                                      className="px-3 py-1 bg-blue-500 hover:bg-blue-600 rounded-lg text-xs text-white transition-all duration-300"
                                     >
                                       Start
-                                    </Link>
+                                    </button>
                                   )}
                                 </div>
                               ))}
