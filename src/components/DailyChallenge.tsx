@@ -6,7 +6,7 @@ const DailyChallenge = () => {
   const navigate = useNavigate();
 
   const handleStartChallenge = () => {
-    navigate('/challenges/select');
+    navigate('/challenges');
   };
 
   return (
@@ -24,10 +24,10 @@ const DailyChallenge = () => {
 
       <div className="mb-6">
         <h3 className="text-xl font-semibold mb-2">
-          Python Programming Challenge
+          Programming Challenge
         </h3>
         <p className="text-gray-300">
-          Test your Python skills with our daily coding challenges. Complete
+          Test your programming skills with our daily coding challenges. Complete
           these challenges to earn XP and special badges!
         </p>
       </div>
@@ -39,7 +39,7 @@ const DailyChallenge = () => {
             <span>100 XP</span>
           </div>
           <div className="px-3 py-1 bg-blue-500/20 rounded-full text-blue-400">
-            Python
+            Multiple Languages
           </div>
         </div>
         <button
