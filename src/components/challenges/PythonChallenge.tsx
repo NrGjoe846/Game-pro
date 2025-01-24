@@ -1,136 +1,127 @@
-import React, { useState } from 'react';
-import { ArrowLeft, Code2, CheckCircle, XCircle } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { pythonChallenges } from '../../data/challenges/pythonChallenges';
+import { Challenge, Difficulty } from '../../types/challenges';
+import { useChallenges } from '../../hooks/useChallenges';
 import CodeEditor from '../CodeEditor/CodeEditor';
-
-interface PythonQuestion {
-  id: number;
-  title: string;
-  description: string;
-  input: string;
-  output: string;
-  hint: string;
-}
-
-const pythonQuestions: PythonQuestion[] = [
-  {
-    id: 1,
-    title: "Sum of Two Numbers",
-    description: "Given two integers a and b, return their sum.",
-    input: "a = 5, b = 7",
-    output: "12",
-    hint: "Use the + operator."
-  },
-  {
-    id: 2,
-    title: "Check Even or Odd",
-    description: "Check if a given number is even or odd. Return \"Even\" for even numbers and \"Odd\" for odd numbers.",
-    input: "n = 4",
-    output: "\"Even\"",
-    hint: "Use the modulo operator %."
-  },
-  // Add more questions from your list...
-];
+import BackButton from '../BackButton';
 
 const PythonChallenge = () => {
-  const [currentQuestion, setCurrentQuestion] = useState<PythonQuestion>(pythonQuestions[0]);
+  const navigate = useNavigate();
+  const { progress, initializeProgress, getDailyChallenges, markChallengeComplete } = useChallenges();
+  const [currentChallenge, setCurrentChallenge] = useState<Challenge | null>(null);
   const [code, setCode] = useState('');
-  const [result, setResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [showLevelSelection, setShowLevelSelection] = useState(!progress);
+
+  useEffect(() => {
+    if (progress?.language === 'python') {
+      const challenges = getDailyChallenges();
+      if (challenges.length > 0 && !currentChallenge) {
+        setCurrentChallenge(challenges[0]);
+        setCode(challenges[0].starterCode);
+      }
+    }
+  }, [progress]);
+
+  const handleLevelSelect = (difficulty: Difficulty) => {
+    initializeProgress('python', difficulty);
+    setShowLevelSelection(false);
+  };
 
   const handleSubmit = async () => {
+    if (!currentChallenge) return;
+
     try {
-      const response = await fetch('http://localhost:3000/api/python', {
+      const response = await fetch('/api/python', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ code }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code, testCases: currentChallenge.testCases }),
       });
 
-      const data = await response.json();
-      
-      // Compare output with expected result
-      const success = data.output.trim() === currentQuestion.output.trim();
-      setResult({
-        success,
-        message: success ? 'Correct! Well done!' : 'Incorrect. Try again!'
-      });
+      const result = await response.json();
+
+      if (result.success) {
+        markChallengeComplete(currentChallenge.id);
+        const challenges = getDailyChallenges();
+        if (challenges.length > 0) {
+          setCurrentChallenge(challenges[0]);
+          setCode(challenges[0].starterCode);
+        } else {
+          setCurrentChallenge(null);
+        }
+      }
     } catch (error) {
-      setResult({
-        success: false,
-        message: 'Error executing code. Please try again.'
-      });
+      console.error('Error executing code:', error);
     }
   };
+
+  if (showLevelSelection) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#1a1a2e] to-[#16213e] text-white p-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="mb-8">
+            <BackButton />
+          </div>
+          <div className="text-center mb-12">
+            <h1 className="text-4xl font-bold mb-4">Choose Your Level</h1>
+            <p className="text-gray-400">Select a difficulty level that matches your Python expertise</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {['beginner', 'intermediate', 'advanced'].map((level) => (
+              <button
+                key={level}
+                onClick={() => handleLevelSelect(level as Difficulty)}
+                className="group relative backdrop-blur-xl bg-white/10 p-6 rounded-xl border border-white/10 hover:border-white/20 transition-all duration-300"
+              >
+                <h3 className="text-xl font-bold mb-2 capitalize">{level}</h3>
+                <p className="text-gray-400 mb-4">
+                  {level === 'beginner' ? '1 question' : 
+                   level === 'intermediate' ? '3 questions' : 
+                   '5 questions'} per day
+                </p>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!currentChallenge) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#1a1a2e] to-[#16213e] text-white p-8">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl font-bold mb-4">All Done! 🎉</h2>
+          <p className="text-xl mb-8">You've completed all your Python challenges for today.</p>
+          <p className="text-gray-400">Come back tomorrow for more challenges!</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#1a1a2e] to-[#16213e] text-white p-8">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
-          <Link
-            to="/dashboard"
-            className="p-2 hover:bg-white/10 rounded-lg transition-all duration-300"
-          >
-            <ArrowLeft className="w-6 h-6" />
-          </Link>
-          <div>
-            <h1 className="text-3xl font-bold mb-2">Python Challenge</h1>
-            <p className="text-gray-400">
-              Test your Python skills with these coding challenges
-            </p>
-          </div>
+        <div className="mb-8">
+          <BackButton />
         </div>
-
-        {/* Challenge Content */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Question Panel */}
           <div className="backdrop-blur-xl bg-white/10 rounded-2xl p-6 border border-white/20">
-            <div className="flex items-center gap-3 mb-6">
-              <Code2 className="w-6 h-6 text-blue-400" />
-              <h2 className="text-xl font-bold">{currentQuestion.title}</h2>
+            <h2 className="text-2xl font-bold mb-4">{currentChallenge.title}</h2>
+            <p className="text-gray-300 mb-6">{currentChallenge.description}</p>
+            <div className="bg-black/30 rounded-lg p-4 mb-6">
+              <p className="text-gray-300">Input: {currentChallenge.input}</p>
+              <p className="text-gray-300">Expected Output: {currentChallenge.output}</p>
             </div>
-            
-            <div className="space-y-4 mb-6">
-              <div>
-                <h3 className="font-semibold mb-2">Problem:</h3>
-                <p className="text-gray-300">{currentQuestion.description}</p>
-              </div>
-              
-              <div>
-                <h3 className="font-semibold mb-2">Example:</h3>
-                <div className="bg-black/30 rounded-lg p-4">
-                  <p className="text-gray-300">Input: {currentQuestion.input}</p>
-                  <p className="text-gray-300">Output: {currentQuestion.output}</p>
-                </div>
-              </div>
-              
-              <div>
-                <h3 className="font-semibold mb-2">Hint:</h3>
-                <p className="text-gray-300">{currentQuestion.hint}</p>
-              </div>
-            </div>
-
-            {/* Result Display */}
-            {result && (
-              <div className={`p-4 rounded-lg ${
-                result.success ? 'bg-green-500/20' : 'bg-red-500/20'
-              }`}>
-                <div className="flex items-center gap-2">
-                  {result.success ? (
-                    <CheckCircle className="w-5 h-5 text-green-400" />
-                  ) : (
-                    <XCircle className="w-5 h-5 text-red-400" />
-                  )}
-                  <span>{result.message}</span>
-                </div>
-              </div>
-            )}
+            <p className="text-sm text-gray-400">Hint: {currentChallenge.hint}</p>
           </div>
-
-          {/* Code Editor */}
           <div className="backdrop-blur-xl bg-white/10 rounded-2xl border border-white/20 overflow-hidden">
-            <CodeEditor />
+            <CodeEditor
+              value={code}
+              onChange={setCode}
+              onSubmit={handleSubmit}
+              language="python"
+            />
           </div>
         </div>
       </div>
