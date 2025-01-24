@@ -1,4 +1,5 @@
-import { Challenge } from '../../types/challenges';
+import { javaChallenges } from "../../data/javaChallenges";
+
 
 export const javaChallenges: Challenge[] = [
   {

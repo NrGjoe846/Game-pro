@@ -1,84 +1,185 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { pythonChallenges } from '../../data/challenges/pythonChallenges';
-import { Challenge, Difficulty } from '../../types/challenges';
-import { useChallenges } from '../../hooks/useChallenges';
+import { ArrowLeft, Code2, CheckCircle, XCircle, RefreshCw } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import CodeEditor from '../CodeEditor/CodeEditor';
+import { Challenge, Difficulty } from '../../types/challenges';
+import { pythonChallenges } from '../../data/challenges/pythonChallenges';
 import BackButton from '../BackButton';
 
+interface PythonChallengeProgress {
+  level: Difficulty | null;
+  questionsCompletedToday: number;
+  lastCompletedDate: string | null;
+  completedQuestionIds: number[];
+}
+
+const QUESTIONS_PER_DAY = {
+  beginner: 1,
+  intermediate: 3,
+  advanced: 5,
+};
+
 const PythonChallenge = () => {
-  const navigate = useNavigate();
-  const { progress, initializeProgress, getDailyChallenges, markChallengeComplete } = useChallenges();
-  const [currentChallenge, setCurrentChallenge] = useState<Challenge | null>(null);
+  const [progress, setProgress] = useState<PythonChallengeProgress>(() => {
+    const saved = localStorage.getItem('pythonProgress');
+    return saved ? JSON.parse(saved) : {
+      level: null,
+      questionsCompletedToday: 0,
+      lastCompletedDate: null,
+      completedQuestionIds: [],
+    };
+  });
+
+  const [currentQuestion, setCurrentQuestion] = useState<Challenge | null>(null);
   const [code, setCode] = useState('');
-  const [showLevelSelection, setShowLevelSelection] = useState(!progress);
+  const [result, setResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [showLevelSelection, setShowLevelSelection] = useState(!progress.level);
 
   useEffect(() => {
-    if (progress?.language === 'python') {
-      const challenges = getDailyChallenges();
-      if (challenges.length > 0 && !currentChallenge) {
-        setCurrentChallenge(challenges[0]);
-        setCode(challenges[0].starterCode);
-      }
-    }
+    localStorage.setItem('pythonProgress', JSON.stringify(progress));
   }, [progress]);
 
-  const handleLevelSelect = (difficulty: Difficulty) => {
-    initializeProgress('python', difficulty);
+  useEffect(() => {
+    if (progress.level) {
+      const today = new Date().toDateString();
+      if (progress.lastCompletedDate !== today) {
+        setProgress(prev => ({
+          ...prev,
+          questionsCompletedToday: 0,
+          lastCompletedDate: today,
+        }));
+      }
+      if (!currentQuestion) {
+        loadNextQuestion(progress.level);
+      }
+    }
+  }, [progress.level]);
+
+  const handleLevelSelect = (level: Difficulty) => {
+    setProgress({
+      level,
+      questionsCompletedToday: 0,
+      lastCompletedDate: new Date().toDateString(),
+      completedQuestionIds: [],
+    });
     setShowLevelSelection(false);
+    loadNextQuestion(level);
+  };
+
+  const loadNextQuestion = (level: Difficulty) => {
+    const availableQuestions = pythonChallenges.filter(q => 
+      q.difficulty === level && 
+      !progress.completedQuestionIds.includes(q.id)
+    );
+    
+    if (availableQuestions.length > 0) {
+      const randomIndex = Math.floor(Math.random() * availableQuestions.length);
+      const question = availableQuestions[randomIndex];
+      setCurrentQuestion(question);
+      setCode(question.starterCode);
+      setResult(null);
+    }
   };
 
   const handleSubmit = async () => {
-    if (!currentChallenge) return;
+    if (!currentQuestion) return;
 
     try {
       const response = await fetch('/api/python', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code, testCases: currentChallenge.testCases }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          code,
+          testCases: currentQuestion.testCases 
+        }),
       });
 
-      const result = await response.json();
+      const data = await response.json();
+      const success = data.success;
+      
+      if (success) {
+        setProgress(prev => ({
+          ...prev,
+          questionsCompletedToday: prev.questionsCompletedToday + 1,
+          completedQuestionIds: [...prev.completedQuestionIds, currentQuestion.id],
+        }));
+      }
 
-      if (result.success) {
-        markChallengeComplete(currentChallenge.id);
-        const challenges = getDailyChallenges();
-        if (challenges.length > 0) {
-          setCurrentChallenge(challenges[0]);
-          setCode(challenges[0].starterCode);
-        } else {
-          setCurrentChallenge(null);
-        }
+      setResult({
+        success,
+        message: success ? 'All test cases passed! Well done!' : 'Some test cases failed. Try again!',
+      });
+
+      if (success && progress.level) {
+        setTimeout(() => {
+          const questionsRemaining = QUESTIONS_PER_DAY[progress.level!] - progress.questionsCompletedToday - 1;
+          if (questionsRemaining > 0) {
+            loadNextQuestion(progress.level!);
+          }
+        }, 1500);
       }
     } catch (error) {
-      console.error('Error executing code:', error);
+      setResult({
+        success: false,
+        message: 'Error executing code. Please try again.',
+      });
+    }
+  };
+
+  const handleReset = () => {
+    if (window.confirm('Are you sure you want to reset your progress? This will clear all completed questions.')) {
+      setProgress({
+        level: null,
+        questionsCompletedToday: 0,
+        lastCompletedDate: null,
+        completedQuestionIds: [],
+      });
+      setShowLevelSelection(true);
+      setCurrentQuestion(null);
+      setCode('');
+      setResult(null);
+    }
+  };
+
+  const handleLevelChange = () => {
+    if (window.confirm('Change difficulty level? Your daily progress will be reset, but completed questions will be saved.')) {
+      setShowLevelSelection(true);
+      setCurrentQuestion(null);
+      setCode('');
+      setResult(null);
     }
   };
 
   if (showLevelSelection) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#1a1a2e] to-[#16213e] text-white p-8">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-7xl mx-auto">
           <div className="mb-8">
             <BackButton />
           </div>
           <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold mb-4">Choose Your Level</h1>
-            <p className="text-gray-400">Select a difficulty level that matches your Python expertise</p>
+            <h1 className="text-4xl font-bold mb-4">Python Programming Challenge</h1>
+            <p className="text-gray-400">Choose your difficulty level to begin</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {['beginner', 'intermediate', 'advanced'].map((level) => (
+            {Object.entries(QUESTIONS_PER_DAY).map(([level, questions]) => (
               <button
                 key={level}
                 onClick={() => handleLevelSelect(level as Difficulty)}
-                className="group relative backdrop-blur-xl bg-white/10 p-6 rounded-xl border border-white/10 hover:border-white/20 transition-all duration-300"
+                className="group relative"
               >
-                <h3 className="text-xl font-bold mb-2 capitalize">{level}</h3>
-                <p className="text-gray-400 mb-4">
-                  {level === 'beginner' ? '1 question' : 
-                   level === 'intermediate' ? '3 questions' : 
-                   '5 questions'} per day
-                </p>
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-xl blur-xl transition-all duration-300 opacity-0 group-hover:opacity-100" />
+                <div className="relative backdrop-blur-xl bg-white/10 p-6 rounded-xl border border-white/10 hover:border-white/20 transition-all duration-300">
+                  <h3 className="text-xl font-bold mb-2 capitalize">{level}</h3>
+                  <p className="text-gray-400 mb-4">
+                    {questions} {questions === 1 ? 'question' : 'questions'} per day
+                  </p>
+                  <div className="text-sm text-blue-400">
+                    Click to start
+                  </div>
+                </div>
               </button>
             ))}
           </div>
@@ -87,13 +188,23 @@ const PythonChallenge = () => {
     );
   }
 
-  if (!currentChallenge) {
+  const questionsRemaining = progress.level 
+    ? QUESTIONS_PER_DAY[progress.level] - progress.questionsCompletedToday 
+    : 0;
+
+  if (questionsRemaining === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#1a1a2e] to-[#16213e] text-white p-8">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-4">All Done! 🎉</h2>
+      <div className="min-h-screen bg-gradient-to-br from-[#1a1a2e] to-[#16213e] text-white p-8 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-3xl font-bold mb-4">Great job! 🎉</h2>
           <p className="text-xl mb-8">You've completed all your Python challenges for today.</p>
-          <p className="text-gray-400">Come back tomorrow for more challenges!</p>
+          <p className="text-gray-400 mb-8">Come back tomorrow for more challenges!</p>
+          <button
+            onClick={handleReset}
+            className="px-6 py-2 bg-blue-500 hover:bg-blue-600 rounded-lg transition-all duration-300"
+          >
+            Reset Progress
+          </button>
         </div>
       </div>
     );
@@ -102,28 +213,90 @@ const PythonChallenge = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#1a1a2e] to-[#16213e] text-white p-8">
       <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
+        {/* Header */}
+        <div className="flex items-center gap-4 mb-8">
           <BackButton />
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="backdrop-blur-xl bg-white/10 rounded-2xl p-6 border border-white/20">
-            <h2 className="text-2xl font-bold mb-4">{currentChallenge.title}</h2>
-            <p className="text-gray-300 mb-6">{currentChallenge.description}</p>
-            <div className="bg-black/30 rounded-lg p-4 mb-6">
-              <p className="text-gray-300">Input: {currentChallenge.input}</p>
-              <p className="text-gray-300">Expected Output: {currentChallenge.output}</p>
+          <div className="flex-1">
+            <h1 className="text-3xl font-bold mb-2">Python Programming Challenge</h1>
+            <div className="flex items-center gap-4">
+              <p className="text-gray-400">
+                Level: {progress.level?.charAt(0).toUpperCase() + progress.level?.slice(1)} • 
+                Questions remaining today: {questionsRemaining}
+              </p>
+              <button
+                onClick={handleLevelChange}
+                className="text-sm px-3 py-1 bg-blue-500/20 hover:bg-blue-500/30 rounded-lg transition-all duration-300"
+              >
+                Change Level
+              </button>
+              <button
+                onClick={handleReset}
+                className="text-sm px-3 py-1 bg-red-500/20 hover:bg-red-500/30 rounded-lg transition-all duration-300 flex items-center gap-2"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Reset Progress
+              </button>
             </div>
-            <p className="text-sm text-gray-400">Hint: {currentChallenge.hint}</p>
-          </div>
-          <div className="backdrop-blur-xl bg-white/10 rounded-2xl border border-white/20 overflow-hidden">
-            <CodeEditor
-              value={code}
-              onChange={setCode}
-              onSubmit={handleSubmit}
-              language="python"
-            />
           </div>
         </div>
+
+        {currentQuestion && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Question Panel */}
+            <div className="backdrop-blur-xl bg-white/10 rounded-2xl p-6 border border-white/20">
+              <div className="flex items-center gap-3 mb-6">
+                <Code2 className="w-6 h-6 text-blue-400" />
+                <h2 className="text-xl font-bold">{currentQuestion.title}</h2>
+              </div>
+              
+              <div className="space-y-4 mb-6">
+                <div>
+                  <h3 className="font-semibold mb-2">Problem:</h3>
+                  <p className="text-gray-300">{currentQuestion.description}</p>
+                </div>
+                
+                <div>
+                  <h3 className="font-semibold mb-2">Example:</h3>
+                  <div className="bg-black/30 rounded-lg p-4">
+                    <p className="text-gray-300">Input: {currentQuestion.input}</p>
+                    <p className="text-gray-300">Output: {currentQuestion.output}</p>
+                  </div>
+                </div>
+                
+                <div>
+                  <h3 className="font-semibold mb-2">Hint:</h3>
+                  <p className="text-gray-300">{currentQuestion.hint}</p>
+                </div>
+              </div>
+
+              {/* Result Display */}
+              {result && (
+                <div className={`p-4 rounded-lg ${
+                  result.success ? 'bg-green-500/20' : 'bg-red-500/20'
+                }`}>
+                  <div className="flex items-center gap-2">
+                    {result.success ? (
+                      <CheckCircle className="w-5 h-5 text-green-400" />
+                    ) : (
+                      <XCircle className="w-5 h-5 text-red-400" />
+                    )}
+                    <span>{result.message}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Code Editor */}
+            <div className="backdrop-blur-xl bg-white/10 rounded-2xl border border-white/20 overflow-hidden">
+              <CodeEditor 
+                value={code} 
+                onChange={setCode} 
+                onSubmit={handleSubmit}
+                language="python"
+              />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

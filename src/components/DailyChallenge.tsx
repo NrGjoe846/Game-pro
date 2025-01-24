@@ -6,7 +6,7 @@ const DailyChallenge = () => {
   const navigate = useNavigate();
 
   const handleStartChallenge = () => {
-    navigate('/challenges');
+    navigate('/challenges/language-select');
   };
 
   return (
