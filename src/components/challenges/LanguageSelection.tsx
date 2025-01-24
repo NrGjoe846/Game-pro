@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Code2, Coffee } from 'lucide-react';
 import { motion } from 'framer-motion';
+import BackButton from '../BackButton';
 
 interface ProgrammingLanguage {
   id: 'python' | 'java';
@@ -9,6 +10,7 @@ interface ProgrammingLanguage {
   description: string;
   icon: React.ReactNode;
   color: string;
+  path: string;
 }
 
 const languages: ProgrammingLanguage[] = [
@@ -17,14 +19,16 @@ const languages: ProgrammingLanguage[] = [
     title: 'Python',
     description: 'Perfect for beginners and data science enthusiasts',
     icon: <Code2 className="w-6 h-6" />,
-    color: 'from-blue-500/20 to-cyan-500/20'
+    color: 'from-blue-500/20 to-cyan-500/20',
+    path: '/challenges/level-select'
   },
   {
     id: 'java',
     title: 'Java',
     description: 'Great for object-oriented programming and enterprise applications',
     icon: <Coffee className="w-6 h-6" />,
-    color: 'from-red-500/20 to-orange-500/20'
+    color: 'from-red-500/20 to-orange-500/20',
+    path: '/challenges/java'
   }
 ];
 
@@ -33,7 +37,7 @@ const LanguageSelection = () => {
 
   const handleLanguageSelect = (language: ProgrammingLanguage) => {
     localStorage.setItem('selectedLanguage', language.id);
-    navigate('/challenges/level-select');
+    navigate(language.path);
   };
 
   return (
@@ -41,28 +45,7 @@ const LanguageSelection = () => {
       <div className="max-w-4xl mx-auto">
         {/* Progress Indicator */}
         <div className="mb-8">
-          <div className="flex items-center justify-between max-w-xs mx-auto">
-            <div className="flex flex-col items-center">
-              <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                1
-              </div>
-              <span className="text-sm mt-2">Language</span>
-            </div>
-            <div className="flex-1 h-1 bg-white/10 mx-2" />
-            <div className="flex flex-col items-center">
-              <div className="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center">
-                2
-              </div>
-              <span className="text-sm mt-2">Level</span>
-            </div>
-            <div className="flex-1 h-1 bg-white/10 mx-2" />
-            <div className="flex flex-col items-center">
-              <div className="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center">
-                3
-              </div>
-              <span className="text-sm mt-2">Challenge</span>
-            </div>
-          </div>
+          <BackButton />
         </div>
 
         <div className="text-center mb-12">

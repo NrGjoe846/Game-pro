@@ -13,6 +13,7 @@ import ChallengeCategories from './components/challenges/ChallengeCategories';
 import LanguageSelection from './components/challenges/LanguageSelection';
 import LevelSelection from './components/challenges/LevelSelection';
 import DailyChallenge from './components/challenges/DailyChallenge';
+import JavaChallenge from './components/challenges/JavaChallenge';
 
 function App() {
   return (
@@ -97,6 +98,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <DailyChallenge />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/challenges/java"
+            element={
+              <ProtectedRoute>
+                <JavaChallenge />
               </ProtectedRoute>
             }
           />
